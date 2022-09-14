@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style> /* set the CSS */
+
+body { font: 12px Arial;}
+
+circle,
+path {
+    stroke: mediumpurple;
+    stroke-width: 3;
+    fill: none;
+}
+
+.axis path,
+.axis line {
+    fill: none;
+    stroke: grey;
+    stroke-width: 1;
+    shape-rendering: crispEdges;
+}
+
+</style>
+<body>
+
+<title>Twitch Streamer Data</title>
+
+<h1>Hypothesis</h1>
+<p>My hypothesis is that the more time a streamer spends streaming the greater their average view count becomes.</p>
+
+<!-- load the d3.js library -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.17/d3.min.js"></script>
+
+<script>
+    // Set the dimensions of the canvas / graph
+    var margin = {top: 20, right: 10, bottom: 30, left: 70},
+        width = 600 - margin.left - margin.right,
+        height = 270 - margin.top - margin.bottom;
+
+    // Set the ranges
+    var x = d3.scale.linear().range([0, width]);
+    var y = d3.scale.linear().range([height, 0]);
+
+    // Define the axes
+    var xAxis = d3.svg.axis().scale(x)
+        .orient("bottom").ticks(5);
+
+    var yAxis = d3.svg.axis().scale(y)
+        .orient("left").ticks(5);
+
+    // Adds the svg canvas
+    var svg = d3.select("body")
+        .append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom + 50)
+        .append("g")
+        .attr("transform",
+            "translate(" + margin.left + "," + margin.top + ")");
+
+    // Get the data
+    d3.csv("twitchstreamers.csv", function(error, data) {
+        data.forEach(function(d) {
+            d.channel = +d.channel;
+            d.wTime = +d.wTime;
+            d.sTime = +d.sTime;
+            d.peakViews = +d.peakViews;
+            d.avgViews = +d.avgViews;
+            d.followers = +d.followers;
+        });
+
+        // Scale the range of the data
+        x.domain(d3.extent(data, function(d) { return d.sTime / 2; }));
+        y.domain([0, d3.max(data, function(d) { return d.avgViews / 4; })]);
+
+        // Add the scatterplot
+        svg.selectAll("dot")
+            .data(data)
+            .enter().append("circle")
+            .attr("r", 2)
+            .attr("cx", function(d) { return x(d.sTime); })
+            .attr("cy", function(d) { return y(d.avgViews); });
+
+        // Add the X Axis
+        svg.append("g")
+            .attr("class", "x axis")
+            .attr("transform", "translate(0," + height + ")")
+            .call(xAxis);
+
+        // Add the Y Axis
+        svg.append("g")
+            .attr("class", "y axis")
+            .call(yAxis);
+
+        svg.append("text")
+            .attr("class", "x label")
+            .attr("text-anchor", "end")
+            .attr("x", width / 2 + 50)
+            .attr("y", height + 35)
+            .text("Stream Time (min)");
+
+        svg.append("text")
+            .attr("class", "y label")
+            .attr("text-anchor", "end")
+            .attr("x", -70)
+            .attr("y", -60)
+            .attr("dy", ".5em")
+            .attr("transform", "rotate(-90)")
+            .text("Average Views");
+
+        svg.append("text")
+            .attr("x", (width / 2))
+            .attr("y", 0 - (margin.top / 2) + 10)
+            .attr("text-anchor", "middle")
+            .style("font-size", "16px")
+            .style("text-decoration", "underline")
+            .text("Stream Time vs. Avg View Count");
+
+    });
+</script>
+
+<p>From the graph above there is a slight trend of an exponentially decaying line where the longer you stream the less average viewers you get.</p>
+<br>
+
+<script>
+    // Set the dimensions of the canvas / graph
+    var margin = {top:20, right: 10, bottom: 30, left: 110},
+        width = 600 - margin.left - margin.right,
+        height = 270 - margin.top - margin.bottom;
+
+    // Set the ranges
+    var x = d3.scale.linear().range([0, width]);
+    var y = d3.scale.linear().range([height, 0]);
+
+    // Define the axes
+    var xAxis = d3.svg.axis().scale(x)
+        .orient("bottom").ticks(5);
+
+    var yAxis = d3.svg.axis().scale(y)
+        .orient("left").ticks(5);
+
+    // Adds the svg canvas
+    var svg1 = d3.select("body")
+        .append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom + 50)
+        .append("g")
+        .attr("transform",
+            "translate(" + margin.left + "," + margin.top + ")");
+
+    // Get the data
+    d3.csv("twitchstreamers.csv", function(error, data) {
+        data.forEach(function(d) {
+            d.channel = +d.channel;
+            d.wTime = +d.wTime;
+            d.sTime = +d.sTime;
+            d.peakViews = +d.peakViews;
+            d.avgViews = +d.avgViews;
+            d.followers = +d.followers;
+        });
+
+        // Scale the range of the data
+        x.domain(d3.extent(data, function(d) { return d.followers / 2; }));
+        y.domain([0, d3.max(data, function(d) { return d.wTime / 4; })]);
+
+        // Add the scatterplot
+        svg1.selectAll("dot")
+            .data(data)
+            .enter().append("circle")
+            .attr("r", 2)
+            .attr("cx", function(d) { return x(d.followers); })
+            .attr("cy", function(d) { return y(d.wTime); });
+
+        // Add the X Axis
+        svg1.append("g")
+            .attr("class", "x axis")
+            .attr("transform", "translate(0," + height + ")")
+            .call(xAxis);
+
+        // Add the Y Axis
+        svg1.append("g")
+            .attr("class", "y axis")
+            .call(yAxis);
+
+        //X Axis Label
+        svg1.append("text")
+            .attr("class", "x label")
+            .attr("text-anchor", "end")
+            .attr("x", width / 2 + 50)
+            .attr("y", height + 35)
+            .text("Followers");
+
+        //Y Axis Label
+        svg1.append("text")
+            .attr("class", "y label")
+            .attr("text-anchor", "end")
+            .attr("x", -70)
+            .attr("y", -100)
+            .attr("dy", ".5em")
+            .attr("transform", "rotate(-90)")
+            .text("Watch Time (min)");
+
+        //Title
+        svg1.append("text")
+            .attr("x", (width / 2))
+            .attr("y", 0 - (margin.top / 2) + 10)
+            .attr("text-anchor", "middle")
+            .style("font-size", "16px")
+            .style("text-decoration", "underline")
+            .text("Watch Time vs. Followers");
+
+    });
+</script>
+
+</body>
